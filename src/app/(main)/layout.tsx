@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import MainLayout from "./MainLayout";
 import { AuthProvider } from "./AuthProvider";
 
@@ -9,7 +9,9 @@ function Layout({
 }>) {
 	return (
 		<AuthProvider>
-			<MainLayout>{children}</MainLayout>
+			<Suspense fallback={<></>}>
+				<MainLayout>{children}</MainLayout>
+			</Suspense>
 		</AuthProvider>
 	);
 }
