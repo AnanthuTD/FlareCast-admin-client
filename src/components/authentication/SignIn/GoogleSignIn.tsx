@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { notification } from "antd";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { login, loginRequest, loginFailure } from "@/redux/slices/user";
-import { adminGoogleSignIn } from "@/actions/AdminActions"; 
+import { adminGoogleSignIn } from "@/actions/adminActions"; 
 import { GoogleSignInButton } from "./GoogleSignInButton"; 
 import { User } from "@/types/types";
 
@@ -33,7 +33,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({
 		if (callbackUrl) {
 			window.location.href = callbackUrl;
 		} else {
-			router.replace("/home");
+			router.replace("/dashboard");
 		}
 	};
 
@@ -57,7 +57,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({
 				message: "Successfully logged in!",
 				description: "You have successfully logged in with Google.",
 			});
-			handleGoogleLoginSuccess(result.payload.admin); 
+			handleGoogleLoginSuccess(result.payload); 
 		} catch (error: any) {
 			handleGoogleLoginError(error.message || "Google sign-in failed");
 		} finally {
@@ -88,7 +88,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({
 			{error && <div className="error">{error}</div>}
 			<GoogleSignInButton
 				onClick={() => googleLogin()}
-				disabled={reduxLoading || localLoading}
+				disabled={localLoading}
 			/>
 		</div>
 	);

@@ -40,22 +40,22 @@ const ChatIcon = () => {
 	);
 };
 const items: MenuItem[] = [
-	getItem("Dashboard", "/admin/dashboard", <HomeOutlined />),
-	getItem("User", "/admin/users", <UserOutlined />),
-	getItem("Payment Overview", "/admin/payment-overview", <DollarOutlined />),
-	getItem("Reports", "/admin/reports", <FileTextOutlined />),
-	// getItem('Notifications ', '/admin/notifications', <NotificationIcon />),
+	getItem("Dashboard", "/dashboard", <HomeOutlined />),
+	getItem("User", "/users", <UserOutlined />),
+	getItem("Payment Overview", "/payment-overview", <DollarOutlined />),
+	getItem("Reports", "/reports", <FileTextOutlined />),
+	// getItem('Notifications ', '/notifications', <NotificationIcon />),
 	getItem(
 		"Subscription Management",
-		"/admin/subscription",
+		"/subscription",
 		<CreditCardOutlined />
 	),
-	// getItem('Notifications', '/admin/notifications', <NotificationOutlined />),
-	// getItem('Chats', '/admin/chat', <ChatIcon />),
+	// getItem('Notifications', '/notifications', <NotificationOutlined />),
+	// getItem('Chats', '/chat', <ChatIcon />),
 ];
 
 const accountMenuItems = [
-	getItem("Profile", "/admin/profile", <ProfileOutlined />),
+	getItem("Profile", "/profile", <ProfileOutlined />),
 ];
 
 const AdminSidebar = ({ collapsed }: { collapsed: boolean }) => (

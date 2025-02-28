@@ -4,7 +4,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import axiosInstance from '@/lib/axios';
 import { useAppDispatch } from '@/redux/hooks';
 import { useRouter } from 'next/navigation';
-import { logoutUser } from '@/redux/slices/user';
+import { adminLogout } from '@/actions/adminActions';
 
 const { Header } = Layout;
 
@@ -23,7 +23,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ collapsed, toggle }) => {
   const router = useRouter();
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(adminLogout);
     axiosInstance.get('/admin/auth/logout');
     router.push('/admin/signin');
   };

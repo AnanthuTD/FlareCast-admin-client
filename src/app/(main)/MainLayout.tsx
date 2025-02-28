@@ -8,7 +8,7 @@ import ContentArea from "./ContentArea";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { fetchAdminProfile } from "@/actions/adminAction";
+import { fetchAdminProfileThunk } from "@/actions/adminActions";
 import { login } from "@/redux/slices/user";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -34,7 +34,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
 				// If no shopOwner data, attempt to fetch the profile
 				if (!user) {
-					const profile = await fetchAdminProfile();
+					const profile = await fetchAdminProfileThunk();
 					if (!profile) {
 						router.push("/admin/signin");
 					} else {
