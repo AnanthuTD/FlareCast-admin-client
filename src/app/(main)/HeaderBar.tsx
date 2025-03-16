@@ -24,8 +24,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ collapsed, toggle }) => {
 
   const handleLogout = () => {
     dispatch(adminLogout);
-    axiosInstance.get('/admin/auth/logout');
-    router.push('/admin/signin');
+    axiosInstance.get('/api/user/admin/auth/logout');
+    router.push('/signin');
   };
 
   return (

@@ -10,17 +10,26 @@ import {
 	message,
 	InputNumber,
 	Select,
+	Switch,
 } from "antd";
 import axiosInstance from "@/lib/axios";
 
 interface SubscriptionPlan {
 	id: string;
-	planId: string; // Razorpay plan ID
+	type: "free" | "paid"; // Assuming PlanType enum has these values
+	planId: string;
 	name: string;
 	price: number;
 	interval: number;
-	productLimit: number;
-	period: "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "YEARLY";
+	period: "daily" | "weekly" | "monthly" | "quarterly" | "yearly"; // Lowercase period
+	maxRecordingDuration: number;
+	hasAiFeatures: boolean;
+	allowsCustomBranding: boolean;
+	hasAdvancedEditing: boolean;
+	maxMembers?: number;
+	maxVideoCount: number;
+	maxWorkspaces?: number;
+	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -66,9 +75,12 @@ const SubscriptionPlans: React.FC = () => {
 
 	const handleDeletePlan = async (planId: string) => {
 		try {
-			await axiosInstance.delete(`/api/user/admin/subscription-plans/${planId}`, {
-				withCredentials: true,
-			});
+			await axiosInstance.delete(
+				`/api/user/admin/subscription-plans/${planId}`,
+				{
+					withCredentials: true,
+				}
+			);
 			message.success("Subscription plan deleted!");
 			fetchPlans();
 		} catch (error) {
@@ -81,11 +93,57 @@ const SubscriptionPlans: React.FC = () => {
 	}, []);
 
 	const columns = [
+		{ title: "Type", dataIndex: "type", key: "type" },
 		{ title: "Name", dataIndex: "name", key: "name" },
 		{ title: "Price (INR)", dataIndex: "price", key: "price" },
 		{ title: "Interval", dataIndex: "interval", key: "interval" },
 		{ title: "Period", dataIndex: "period", key: "period" },
-		{ title: "Product Limit", dataIndex: "productLimit", key: "productLimit" },
+		{
+			title: "Max Recording (min)",
+			dataIndex: "maxRecordingDuration",
+			key: "maxRecordingDuration",
+		},
+		{
+			title: "AI Features",
+			dataIndex: "hasAiFeatures",
+			key: "hasAiFeatures",
+			render: (value: boolean) => (value ? "Yes" : "No"),
+		},
+		{
+			title: "Custom Branding",
+			dataIndex: "allowsCustomBranding",
+			key: "allowsCustomBranding",
+			render: (value: boolean) => (value ? "Yes" : "No"),
+		},
+		{
+			title: "Advanced Editing",
+			dataIndex: "hasAdvancedEditing",
+			key: "hasAdvancedEditing",
+			render: (value: boolean) => (value ? "Yes" : "No"),
+		},
+		{ title: "Max Members", dataIndex: "maxMembers", key: "maxMembers" },
+		{
+			title: "Max Video Count",
+			dataIndex: "maxVideoCount",
+			key: "maxVideoCount",
+		},
+		{
+			title: "Max Workspaces",
+			dataIndex: "maxWorkspaces",
+			key: "maxWorkspaces",
+		},
+		{
+			title: "Active",
+			dataIndex: "isActive",
+			key: "isActive",
+			render: (value: boolean) => (value ? "Yes" : "No"),
+		},
+		{
+			title: "Created At",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			render: (value: string) => new Date(value).toLocaleDateString(),
+		},
 		{
 			title: "Actions",
 			key: "actions",
@@ -122,6 +180,16 @@ const SubscriptionPlans: React.FC = () => {
 			>
 				<Form form={form} onFinish={handleAddPlan} layout="vertical">
 					<Form.Item
+						name="type"
+						label="Plan Type"
+						rules={[{ required: true, message: "Please select a plan type" }]}
+					>
+						<Select style={{ width: "100%" }}>
+							<Option value="free">Free</Option>
+							<Option value="paid">Paid</Option>
+						</Select>
+					</Form.Item>
+					<Form.Item
 						name="name"
 						label="Plan Name"
 						rules={[{ required: true, message: "Please enter the plan name" }]}
@@ -137,7 +205,7 @@ const SubscriptionPlans: React.FC = () => {
 					</Form.Item>
 					<Form.Item
 						name="interval"
-						label="Interval (e.g., 1 for monthly)"
+						label="Interval"
 						rules={[{ required: true, message: "Please enter the interval" }]}
 					>
 						<InputNumber min={1} style={{ width: "100%" }} />
@@ -145,7 +213,6 @@ const SubscriptionPlans: React.FC = () => {
 					<Form.Item
 						name="period"
 						label="Period"
-						initialValue="monthly"
 						rules={[{ required: true, message: "Please select a period" }]}
 					>
 						<Select style={{ width: "100%" }}>
@@ -157,13 +224,56 @@ const SubscriptionPlans: React.FC = () => {
 						</Select>
 					</Form.Item>
 					<Form.Item
-						name="productLimit"
-						label="Product Limit"
-						rules={[
-							{ required: true, message: "Please enter the product limit" },
-						]}
+						name="maxRecordingDuration"
+						label="Max Recording Duration (minutes)"
+						initialValue={1}
 					>
-						<InputNumber min={1} style={{ width: "100%" }} />
+						<InputNumber min={0} style={{ width: "100%" }} />
+					</Form.Item>
+					<Form.Item
+						name="hasAiFeatures"
+						label="AI Features"
+						valuePropName="checked"
+						initialValue={false}
+					>
+						<Switch />
+					</Form.Item>
+					<Form.Item
+						name="allowsCustomBranding"
+						label="Custom Branding"
+						valuePropName="checked"
+						initialValue={false}
+					>
+						<Switch />
+					</Form.Item>
+					<Form.Item
+						name="hasAdvancedEditing"
+						label="Advanced Editing"
+						valuePropName="checked"
+						initialValue={false}
+					>
+						<Switch />
+					</Form.Item>
+					<Form.Item name="maxMembers" label="Max Members">
+						<InputNumber min={0} style={{ width: "100%" }} />
+					</Form.Item>
+					<Form.Item
+						name="maxVideoCount"
+						label="Max Video Count"
+						initialValue={1}
+					>
+						<InputNumber min={0} style={{ width: "100%" }} />
+					</Form.Item>
+					<Form.Item name="maxWorkspaces" label="Max Workspaces">
+						<InputNumber min={0} style={{ width: "100%" }} />
+					</Form.Item>
+					<Form.Item
+						name="isActive"
+						label="Active"
+						valuePropName="checked"
+						initialValue={true}
+					>
+						<Switch />
 					</Form.Item>
 					<Button type="primary" htmlType="submit" loading={loading}>
 						Add Plan

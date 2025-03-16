@@ -36,7 +36,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 				if (!user) {
 					const profile = await fetchAdminProfileThunk();
 					if (!profile) {
-						router.push("/admin/signin");
+						router.push("/signin");
 					} else {
 						// Update Redux store with fetched profile data
 						console.log(profile);
@@ -46,7 +46,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 				}
 			} catch (error) {
 				console.error("Error fetching profile:", error);
-				router.push("/admin/signin"); // Navigate to sign-in if fetching profile fails
+				router.push("/signin"); // Navigate to sign-in if fetching profile fails
 			}
 		};
 

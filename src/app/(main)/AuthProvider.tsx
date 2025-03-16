@@ -61,8 +61,9 @@ export const useAuth = () => {
 };
 
 // ProtectedRoute component to wrap pages or components
-export const ProtectedRoute: React.FC<{ children: ReactNode }> = ({
+export const ProtectedRoute: React.FC<{ children: ReactNode , skeleton?: ReactNode}> = ({
 	children,
+	skeleton
 }) => {
 	const { isAuthenticated, loading, user } = useAuth();
 	const router = useRouter();
@@ -76,7 +77,7 @@ export const ProtectedRoute: React.FC<{ children: ReactNode }> = ({
 	}, [isAuthenticated, loading, router, user]);
 
 	if (loading) {
-		return <div>Loading...</div>;
+		return skeleton ||  <div>Loading...</div>;
 	}
 
 	return isAuthenticated ? <>{children}</> : null;

@@ -181,6 +181,10 @@ const SubscriptionPlans: React.FC = () => {
 									<span className="mr-2 text-green-600">✓</span>
 									AI Feature: {plan.aiFeature ? "Limited" : "Unlimited"}
 								</li>
+								<li className="flex items-center">
+									<span className="mr-2 text-green-600">✓</span>
+									Trim: {plan.aiFeature ? "Enabled" : "Disabled"}
+								</li>
 							</ul>
 							{plan.description && (
 								<p className="mt-4 text-gray-500 text-sm italic">
@@ -340,6 +344,20 @@ const SubscriptionPlans: React.FC = () => {
 								<Select className="rounded-full w-full">
 									<Option value={true}>Limited</Option>
 									<Option value={false}>Unlimited</Option>
+								</Select>
+							</Form.Item>
+						</Col>
+						<Col span={12}>
+							<Form.Item
+								name="trim"
+								label="Trim"
+								rules={[
+									{ required: true, message: "Please select trim" },
+								]}
+							>
+								<Select className="rounded-full w-full">
+									<Option value={true}>enable</Option>
+									<Option value={false}>disable</Option>
 								</Select>
 							</Form.Item>
 						</Col>

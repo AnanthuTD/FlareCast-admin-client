@@ -16,10 +16,10 @@ import {
 import { getItem } from "@/components/layoutHelpers";
 import { Badge } from "antd";
 // import useChat from '@/hooks/fetchUnreadChatsStatus';
-import { useNotification } from "@/components/NotificationContext";
+// import { useNotification } from "@/components/NotificationContext";
 import BaseSidebar, { MenuItem } from "@/components/BaseSidebar";
 
-const NotificationIcon = () => {
+/* const NotificationIcon = () => {
 	const { unreadNotificationCount } = useNotification();
 
 	return (
@@ -27,7 +27,7 @@ const NotificationIcon = () => {
 			<BellOutlined style={{ fontSize: 17, marginInlineEnd: "10px" }} />
 		</Badge>
 	);
-};
+}; */
 
 const ChatIcon = () => {
 	// const { hasUnreadChats } = useChat('admin', admin?.id);
