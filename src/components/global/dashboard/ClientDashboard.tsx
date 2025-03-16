@@ -24,14 +24,14 @@ const separateByStatus = (
 	const failed: VideoStatus[] = [];
 
 	Object.values(videos).forEach((video) => {
-		switch (video.status) {
-			case "processing":
+		switch (video.status.toUpperCase()) {
+			case "PROCESSING":
 				processing.push(video);
 				break;
-			case "success":
+			case "SUCCESS":
 				success.push(video);
 				break;
-			case "failed":
+			case "FAILED":
 				failed.push(video);
 				break;
 		}
@@ -47,7 +47,7 @@ export const ClientDashboard = () => {
 		console.log("ClientDashboard state: ", state);
 	}, [state]);
 
-	if (!isConnected) return <AdminDashboardSkeleton/>;
+	if (!isConnected) return <AdminDashboardSkeleton />;
 
 	// Separate statuses for each category
 	const transcoding = separateByStatus(state.transcodingVideos);

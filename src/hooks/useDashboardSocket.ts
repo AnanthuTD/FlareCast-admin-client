@@ -8,6 +8,18 @@ import {
 } from "@/types/types";
 import { useSocket } from "./useSocket";
 
+// Helper function to remove a video from a specific category
+const removeVideoFromCategory = (
+	category: Record<string, VideoStatus>,
+	videoId: string
+): Record<string, VideoStatus> => {
+	if (category[videoId]) {
+		const { [videoId]: _, ...rest } = category;
+		return rest;
+	}
+	return category;
+};
+
 export const useDashboardSocket = (): AdminDashboardHook => {
 	const [state, setState] = useState<AdminDashboardHook["state"]>({
 		activeUsers: 0,
@@ -19,13 +31,14 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 		titleSummaries: {},
 		thumbnails: {},
 		subscriptions: [],
+		activeSubscriptionsCount: 0
 	});
-	console.log(`${process.env.NEXT_PUBLIC_USER_SERVICE_URL}/admin-dashboard`);
+
 	const { onEvent: onVideoEvent, isConnected: isVideoSocketConnected } =
-	useSocket(
-		`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
-		"/video/socket.io"
-	);
+		useSocket(
+			`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
+			"/video/socket.io"
+		);
 	const { onEvent, isConnected } = useSocket(
 		`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
 		"/user/socket.io"
@@ -36,12 +49,13 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 			console.log("Connected to admin dashboard WebSocket");
 		});
 
-			onVideoEvent(
+		onVideoEvent(
 			EventName.ADMIN_DASHBOARD_INITIAL_DATA,
 			(data: AdminDashboardState) => {
-				setState(prev=>({...prev, ...data}));
+				setState((prev) => ({ ...prev, ...data }));
 			}
 		);
+
 		onEvent(
 			EventName.ADMIN_DASHBOARD_INITIAL_DATA,
 			(data: AdminDashboardState) => {
@@ -54,7 +68,7 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 			setState((prev) => ({ ...prev, activeUsers: data.count }));
 		});
 
-		onEvent(EventName.NEW_USER_SIGNUP, (data: { data: any }) => {
+		onEvent(EventName.NEW_USER_SIGNUP, (data: { newSignups: number }) => {
 			setState((prev) => ({
 				...prev,
 				newSignups: data.newSignups,
@@ -64,35 +78,50 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 		onVideoEvent(EventName.VIDEO_TRANSCODE, (data: VideoStatus) => {
 			setState((prev) => ({
 				...prev,
-				transcodingVideos: { ...prev.transcodingVideos, [data.videoId]: data },
+				transcodingVideos: {
+					...removeVideoFromCategory(prev.transcodingVideos, data.videoId),
+					[data.videoId]: data,
+				},
 			}));
 		});
 
 		onVideoEvent(EventName.VIDEO_PROCESSED, (data: VideoStatus) => {
 			setState((prev) => ({
 				...prev,
-				processedVideos: { ...prev.processedVideos, [data.videoId]: data },
+				processedVideos: {
+					...removeVideoFromCategory(prev.processedVideos, data.videoId),
+					[data.videoId]: data,
+				},
 			}));
 		});
 
 		onVideoEvent(EventName.TRANSCRIPTION, (data: VideoStatus) => {
 			setState((prev) => ({
 				...prev,
-				transcriptions: { ...prev.transcriptions, [data.videoId]: data },
+				transcriptions: {
+					...removeVideoFromCategory(prev.transcriptions, data.videoId),
+					[data.videoId]: data,
+				},
 			}));
 		});
 
 		onVideoEvent(EventName.TITLE_SUMMARY, (data: VideoStatus) => {
 			setState((prev) => ({
 				...prev,
-				titleSummaries: { ...prev.titleSummaries, [data.videoId]: data },
+				titleSummaries: {
+					...removeVideoFromCategory(prev.titleSummaries, data.videoId),
+					[data.videoId]: data,
+				},
 			}));
 		});
 
 		onVideoEvent(EventName.THUMBNAIL, (data: VideoStatus) => {
 			setState((prev) => ({
 				...prev,
-				thumbnails: { ...prev.thumbnails, [data.videoId]: data },
+				thumbnails: {
+					...removeVideoFromCategory(prev.thumbnails, data.videoId),
+					[data.videoId]: data,
+				},
 			}));
 		});
 
@@ -101,6 +130,12 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 				...prev,
 				subscriptions: [data, ...prev.subscriptions].slice(0, 5),
 			}));
+			if(data.status === 'active'){
+				setState((prev) => ({
+          ...prev,
+          activeSubscriptionsCount: prev.activeSubscriptionsCount + 1
+        }));
+			}
 		});
 
 		onEvent("error", (error: { message: string }) => {

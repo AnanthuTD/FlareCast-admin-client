@@ -64,4 +64,5 @@ export interface AdminDashboardState {
 	titleSummaries: Record<string, VideoStatus>;
 	thumbnails: Record<string, VideoStatus>;
 	subscriptions: SubscriptionUpdate[];
+	activeSubscriptionsCount: number;
 }

@@ -16,7 +16,7 @@ export const VideoStatusTable = ({ title, data }: VideoStatusTableProps) => {
       render: (status: string) => (
         <Tag
           color={
-            status === "processing" ? "blue" : status === "success" ? "green" : "red"
+            status === "PROCESSING" ? "blue" : status === "SUCCESS" ? "green" : "red"
           }
         >
           {status}

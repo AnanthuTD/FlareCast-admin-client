@@ -56,6 +56,11 @@ export const DashboardStats = ({ state }: DashboardStatsProps) => {
           <Statistic title="Thumbnails in Progress" value={thumbnailCount} />
         </Card>
       </Col>
+      <Col xs={24} sm={12} md={6}>
+        <Card>
+          <Statistic title="Active Subscriptions" value={state.activeSubscriptionsCount} />
+        </Card>
+      </Col>
     </Row>
   );
 };
