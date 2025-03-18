@@ -14,14 +14,33 @@ import {
 	Row,
 	Col,
 } from "antd";
-import { SubscriptionPlan } from "@/types/types";
 import {
 	addSubscriptionPlan,
 	fetchSubscriptionPlans,
-  toggleSubscriptionPlanActive,
+	toggleSubscriptionPlanActive,
 } from "@/actions/subscriptionAction";
 
 const { Option } = Select;
+
+interface SubscriptionPlan {
+	id: string;
+	type: "free" | "paid";
+	planId?: string; // Optional for free plans
+	name: string;
+	price: number;
+	interval?: number; // Optional for free plans
+	period?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly"; // Optional for free plans
+	maxRecordingDuration: number;
+	hasAiFeatures: boolean;
+	allowsCustomBranding: boolean;
+	hasAdvancedEditing: boolean;
+	maxMembers?: number;
+	maxVideoCount?: number;
+	maxWorkspaces?: number;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
 
 const SubscriptionPlans: React.FC = () => {
 	const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -36,27 +55,37 @@ const SubscriptionPlans: React.FC = () => {
 			const data = await fetchSubscriptionPlans();
 			setPlans(data);
 		} catch (error: any) {
-			message.error(error.message);
+			message.error(error.message || "Failed to fetch subscription plans");
 		} finally {
 			setLoading(false);
 		}
 	}, []);
 
-	const handleAddPlan = async (
-		values: Omit<
-			SubscriptionPlan,
-			"id" | "planId" | "createdAt" | "updatedAt" | "isActive"
-		>
+	const handleAddOrUpdatePlan = async (
+		values: Omit<SubscriptionPlan, "id" | "planId" | "createdAt" | "updatedAt">
 	) => {
 		try {
 			setLoading(true);
+			if (values.type === "free") {
+				values.price = 0; // Force price to 0 for free plans
+				delete values.interval; // Remove interval for free plans
+				delete values.period; // Remove period for free plans
+			}
 			const newPlan = await addSubscriptionPlan(values);
-			setPlans((prevPlans) => [...prevPlans, newPlan]);
-			message.success("Subscription plan added successfully!");
+			if (editingPlan) {
+				setPlans((prevPlans) =>
+					prevPlans.map((plan) => (plan.id === newPlan.id ? newPlan : plan))
+				);
+				message.success("Subscription plan updated successfully!");
+			} else {
+				setPlans((prevPlans) => [...prevPlans, newPlan]);
+				message.success("Subscription plan added successfully!");
+			}
 			setIsModalVisible(false);
+			setEditingPlan(null);
 			form.resetFields();
 		} catch (error: any) {
-			message.error(error.message);
+			message.error(error.message || "Failed to save subscription plan");
 		} finally {
 			setLoading(false);
 		}
@@ -68,14 +97,14 @@ const SubscriptionPlans: React.FC = () => {
 			const updatedPlan = await toggleSubscriptionPlanActive(planId, isActive);
 			setPlans((prevPlans) =>
 				prevPlans.map((plan) =>
-					plan.planId === updatedPlan.planId ? updatedPlan : plan
+					plan.id === updatedPlan.id ? updatedPlan : plan
 				)
 			);
 			message.success(
 				`Plan ${isActive ? "deactivated" : "activated"} successfully!`
 			);
 		} catch (error: any) {
-			message.error(error.message);
+			message.error(error.message || "Failed to toggle plan status");
 		} finally {
 			setLoading(false);
 		}
@@ -89,15 +118,19 @@ const SubscriptionPlans: React.FC = () => {
 		setEditingPlan(plan || null);
 		form.setFieldsValue(
 			plan || {
+				type: "paid",
 				name: "",
 				price: 0,
 				interval: 1,
 				period: "monthly",
-				videoPerMonth: 25,
-				duration: 5,
-				workspace: 1,
-				aiFeature: true,
-				description: "",
+				maxRecordingDuration: 1,
+				hasAiFeatures: false,
+				allowsCustomBranding: false,
+				hasAdvancedEditing: false,
+				maxMembers: undefined,
+				maxVideoCount: 1,
+				maxWorkspaces: undefined,
+				isActive: true,
 			}
 		);
 		setIsModalVisible(true);
@@ -156,41 +189,57 @@ const SubscriptionPlans: React.FC = () => {
 								>
 									{plan.isActive ? "Deactivate" : "Activate"}
 								</Button>
+								{/* <Button
+									type="link"
+									onClick={() => showModal(plan)}
+									className="text-blue-600 hover:text-blue-800"
+								>
+									Edit
+								</Button> */}
 							</div>
 						}
 					>
 						<div className="mb-6">
 							<p className="text-xl font-semibold text-gray-800 mb-4">
-								₹{plan.price}/m
+								₹{plan.price}
+								{plan.type === "paid" && plan.period ? `/${plan.period}` : ""}
 							</p>
 							<ul className="list-none space-y-2 text-gray-700">
 								<li className="flex items-center">
 									<span className="mr-2 text-green-600">✓</span>
-									Video Per Month:{" "}
-									{plan.videoPerMonth === 0 ? "Unlimited" : plan.videoPerMonth}
+									Max Recording Duration: {plan.maxRecordingDuration} min
 								</li>
 								<li className="flex items-center">
 									<span className="mr-2 text-green-600">✓</span>
-									Duration: {plan.duration} minute
+									AI Features: {plan.hasAiFeatures ? "Yes" : "No"}
 								</li>
 								<li className="flex items-center">
 									<span className="mr-2 text-green-600">✓</span>
-									Workspace: {plan.workspace}
+									Custom Branding: {plan.allowsCustomBranding ? "Yes" : "No"}
 								</li>
 								<li className="flex items-center">
 									<span className="mr-2 text-green-600">✓</span>
-									AI Feature: {plan.aiFeature ? "Limited" : "Unlimited"}
+									Advanced Editing: {plan.hasAdvancedEditing ? "Yes" : "No"}
 								</li>
-								<li className="flex items-center">
-									<span className="mr-2 text-green-600">✓</span>
-									Trim: {plan.aiFeature ? "Enabled" : "Disabled"}
-								</li>
+								{plan.maxMembers && (
+									<li className="flex items-center">
+										<span className="mr-2 text-green-600">✓</span>
+										Max Members: {plan.maxMembers}
+									</li>
+								)}
+								{plan.maxVideoCount && (
+									<li className="flex items-center">
+										<span className="mr-2 text-green-600">✓</span>
+										Max Video Count: {plan.maxVideoCount}
+									</li>
+								)}
+								{plan.maxWorkspaces && (
+									<li className="flex items-center">
+										<span className="mr-2 text-green-600">✓</span>
+										Max Workspaces: {plan.maxWorkspaces}
+									</li>
+								)}
 							</ul>
-							{plan.description && (
-								<p className="mt-4 text-gray-500 text-sm italic">
-									{plan.description}
-								</p>
-							)}
 						</div>
 					</Card>
 				))}
@@ -198,9 +247,7 @@ const SubscriptionPlans: React.FC = () => {
 
 			<Modal
 				title={
-					editingPlan
-						? `Edit ${editingPlan.name}`
-						: "Create Premium Subscription Plan"
+					editingPlan ? `Edit ${editingPlan.name}` : "Create Subscription Plan"
 				}
 				open={isModalVisible}
 				onCancel={() => {
@@ -214,13 +261,28 @@ const SubscriptionPlans: React.FC = () => {
 			>
 				<Form
 					form={form}
-					onFinish={handleAddPlan}
+					onFinish={handleAddOrUpdatePlan}
 					layout="horizontal"
 					labelCol={{ span: 8 }}
 					wrapperCol={{ span: 16 }}
 					className="space-y-4"
 				>
 					<Row gutter={16}>
+						<Col span={12}>
+							<Form.Item
+								name="type"
+								label="Plan Type"
+								rules={[{ required: true, message: "Please select plan type" }]}
+							>
+								<Select
+									className="rounded-full w-full"
+									onChange={(value) => form.setFieldsValue({ type: value })}
+								>
+									<Option value="free">Free</Option>
+									<Option value="paid">Paid</Option>
+								</Select>
+							</Form.Item>
+						</Col>
 						<Col span={12}>
 							<Form.Item
 								name="name"
@@ -232,22 +294,96 @@ const SubscriptionPlans: React.FC = () => {
 								<Input className="rounded-full" />
 							</Form.Item>
 						</Col>
-						<Col span={12}>
-							<Form.Item name="description" label="Description (Optional)">
-								<Input.TextArea className="rounded-full" />
-							</Form.Item>
-						</Col>
 					</Row>
+					<Form.Item
+						noStyle
+						shouldUpdate={(prev, curr) => prev.type !== curr.type}
+					>
+						{({ getFieldValue }) =>
+							getFieldValue("type") === "paid" ? (
+								<>
+									<Row gutter={16}>
+										<Col span={12}>
+											<Form.Item
+												name="price"
+												label="Price (INR)"
+												rules={[
+													{ required: true, message: "Please enter the price" },
+												]}
+											>
+												<InputNumber
+													min={0}
+													step={0.01}
+													style={{ width: "100%" }}
+													className="rounded-full"
+												/>
+											</Form.Item>
+										</Col>
+										<Col span={12}>
+											<Form.Item
+												name="interval"
+												label="Interval"
+												rules={[
+													{
+														required: true,
+														message: "Please enter the interval",
+													},
+												]}
+											>
+												<InputNumber
+													min={1}
+													style={{ width: "100%" }}
+													className="rounded-full"
+												/>
+											</Form.Item>
+										</Col>
+									</Row>
+									<Row gutter={16}>
+										<Col span={12}>
+											<Form.Item
+												name="period"
+												label="Period"
+												rules={[
+													{ required: true, message: "Please select a period" },
+												]}
+											>
+												<Select className="rounded-full w-full">
+													<Option value="daily">Daily</Option>
+													<Option value="weekly">Weekly</Option>
+													<Option value="monthly">Monthly</Option>
+													<Option value="quarterly">Quarterly</Option>
+													<Option value="yearly">Yearly</Option>
+												</Select>
+											</Form.Item>
+										</Col>
+									</Row>
+								</>
+							) : (
+								<Row gutter={16}>
+									<Col span={12}>
+										<Form.Item label="Price (INR)">
+											<InputNumber
+												value={0}
+												disabled
+												className="rounded-full"
+											/>
+										</Form.Item>
+									</Col>
+								</Row>
+							)
+						}
+					</Form.Item>
 					<Row gutter={16}>
 						<Col span={12}>
 							<Form.Item
-								name="price"
-								label="Price (INR)"
-								rules={[{ required: true, message: "Please enter the price" }]}
+								name="maxRecordingDuration"
+								label="Max Recording Duration (min)"
+								rules={[
+									{ required: true, message: "Please enter max duration" },
+								]}
 							>
 								<InputNumber
-									min={0}
-									step={0.01}
+									min={1}
 									style={{ width: "100%" }}
 									className="rounded-full"
 								/>
@@ -255,10 +391,65 @@ const SubscriptionPlans: React.FC = () => {
 						</Col>
 						<Col span={12}>
 							<Form.Item
-								name="interval"
-								label="Interval (e.g., 1 for monthly)"
+								name="hasAiFeatures"
+								label="AI Features"
 								rules={[
-									{ required: true, message: "Please enter the interval" },
+									{ required: true, message: "Please select AI features" },
+								]}
+							>
+								<Select className="rounded-full w-full">
+									<Option value={true}>Yes</Option>
+									<Option value={false}>No</Option>
+								</Select>
+							</Form.Item>
+						</Col>
+					</Row>
+					<Row gutter={16}>
+						{/* <Col span={12}>
+							<Form.Item
+								name="allowsCustomBranding"
+								label="Custom Branding"
+								rules={[
+									{ required: true, message: "Please select custom branding" },
+								]}
+							>
+								<Select className="rounded-full w-full">
+									<Option value={true}>Yes</Option>
+									<Option value={false}>No</Option>
+								</Select>
+							</Form.Item>
+						</Col> */}
+						<Col span={12}>
+							<Form.Item
+								name="hasAdvancedEditing"
+								label="Advanced Editing"
+								rules={[
+									{ required: true, message: "Please select advanced editing" },
+								]}
+							>
+								<Select className="rounded-full w-full">
+									<Option value={true}>Yes</Option>
+									<Option value={false}>No</Option>
+								</Select>
+							</Form.Item>
+						</Col>
+					</Row>
+					<Row gutter={16}>
+						<Col span={12}>
+							<Form.Item name="maxMembers" label="Max Members (Optional)">
+								<InputNumber
+									min={1}
+									style={{ width: "100%" }}
+									className="rounded-full"
+								/>
+							</Form.Item>
+						</Col>
+						<Col span={12}>
+							<Form.Item
+								name="maxVideoCount"
+								label="Max Video Count"
+								rules={[
+									{ required: true, message: "Please enter max video count" },
 								]}
 							>
 								<InputNumber
@@ -271,96 +462,30 @@ const SubscriptionPlans: React.FC = () => {
 					</Row>
 					<Row gutter={16}>
 						<Col span={12}>
-							<Form.Item
-								name="period"
-								label="Period"
-								initialValue="MONTHLY"
-								rules={[{ required: true, message: "Please select a period" }]}
-							>
-								<Select className="rounded-full w-full">
-									<Option value="DAILY">Daily</Option>
-									<Option value="WEEKLY">Weekly</Option>
-									<Option value="MONTHLY">Monthly</Option>
-									<Option value="QUARTERLY">Quarterly</Option>
-									<Option value="YEARLY">Yearly</Option>
-								</Select>
-							</Form.Item>
-						</Col>
-						<Col span={12}>
-							<Form.Item
-								name="videoPerMonth"
-								label="Video Per Month"
-								rules={[
-									{ required: true, message: "Please enter the video limit" },
-								]}
-							>
-								<Select className="rounded-full w-full">
-									<Option value={25}>25</Option>
-									<Option value={50}>50</Option>
-									<Option value={100}>100</Option>
-								</Select>
-							</Form.Item>
-						</Col>
-					</Row>
-					<Row gutter={16}>
-						<Col span={12}>
-							<Form.Item
-								name="duration"
-								label="Duration (minutes)"
-								rules={[{ required: true, message: "Please enter duration" }]}
-							>
-								<InputNumber
-									min={5}
-									style={{ width: "100%" }}
-									className="rounded-full"
-									placeholder="5 minute"
-								/>
-							</Form.Item>
-						</Col>
-						<Col span={12}>
-							<Form.Item
-								name="workspace"
-								label="Workspace"
-								rules={[{ required: true, message: "Please enter workspace" }]}
-							>
+							<Form.Item name="maxWorkspaces" label="Max Workspaces (Optional)">
 								<InputNumber
 									min={1}
 									style={{ width: "100%" }}
 									className="rounded-full"
-									placeholder="1"
 								/>
+							</Form.Item>
+						</Col>
+						<Col span={12}>
+							<Form.Item
+								name="isActive"
+								label="Active"
+								rules={[
+									{ required: true, message: "Please select active status" },
+								]}
+							>
+								<Select className="rounded-full w-full">
+									<Option value={true}>Yes</Option>
+									<Option value={false}>No</Option>
+								</Select>
 							</Form.Item>
 						</Col>
 					</Row>
 					<Row gutter={16}>
-						<Col span={12}>
-							<Form.Item
-								name="aiFeature"
-								label="AI Feature"
-								rules={[
-									{ required: true, message: "Please select AI feature" },
-								]}
-							>
-								<Select className="rounded-full w-full">
-									<Option value={true}>Limited</Option>
-									<Option value={false}>Unlimited</Option>
-								</Select>
-							</Form.Item>
-						</Col>
-						<Col span={12}>
-							<Form.Item
-								name="trim"
-								label="Trim"
-								rules={[
-									{ required: true, message: "Please select trim" },
-								]}
-							>
-								<Select className="rounded-full w-full">
-									<Option value={true}>enable</Option>
-									<Option value={false}>disable</Option>
-								</Select>
-							</Form.Item>
-						</Col>
 						<Col span={12}>
 							<Form.Item>
 								<Button
