@@ -15,7 +15,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import axiosInstance from "@/lib/axios";
 import { User } from "@/types/types"; // Adjust path to your User type
-import AvatarPlaceHolder from "../global/avatar-placeholder";
+import AvatarPlaceHolder from "../avatar-placeholder";
 import { FilterDropdownProps } from "antd/es/table/interface";
 
 // Define response type from the paginated controller

@@ -6,7 +6,7 @@ import './NotificationManager.css';
 import NotificationRepository, {
   UserRole,
 } from '@/infrastructure/repositories/NotificationRepository';
-import { useNotification } from '../NotificationContext';
+import { useNotification } from '../../NotificationContext';
 
 const { Text } = Typography;
 

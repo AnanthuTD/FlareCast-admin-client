@@ -1,4 +1,4 @@
-import NotificationManager from '@/components/notification/NotificationManager';
+import NotificationManager from '@/components/global/notification/NotificationManager';
 import React from 'react';
 
 function NotificationPage() {

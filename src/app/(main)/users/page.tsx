@@ -1,4 +1,4 @@
-import UsersListPage from "@/components/users";
+import UsersListPage from "@/components/global/users";
 import React from "react";
 
 function UsersPage() {

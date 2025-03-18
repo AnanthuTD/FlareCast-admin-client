@@ -12,6 +12,7 @@ import {
 	WechatWorkOutlined,
 	BellOutlined,
 	NotificationOutlined,
+	VideoCameraOutlined
 } from "@ant-design/icons";
 import { getItem } from "@/components/layoutHelpers";
 import { Badge } from "antd";
@@ -42,6 +43,7 @@ const ChatIcon = () => {
 const items: MenuItem[] = [
 	getItem("Dashboard", "/dashboard", <HomeOutlined />),
 	getItem("User", "/users", <UserOutlined />),
+	getItem("CMS", "/cms", <VideoCameraOutlined />),
 	getItem("Payment Overview", "/payment-overview", <DollarOutlined />),
 	getItem("Reports", "/reports", <FileTextOutlined />),
 	// getItem('Notifications ', '/notifications', <NotificationIcon />),
