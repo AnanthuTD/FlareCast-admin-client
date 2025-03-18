@@ -258,7 +258,7 @@ const PromotionalVideosPage: React.FC = () => {
 						>
 							<Avatar className="object-cover w-full h-full rounded-none">
 								<AvatarImage
-									src={`/gcs/${video.id}/thumbnails/thumb00001.jpg`}
+									src={`/gcs/${video.videoId}/thumbnails/thumb00001.jpg`}
 								/>
 								<AvatarFallback className="rounded-none">
 									<div className="flex items-center justify-center h-full  text-gray-600 text-sm">
