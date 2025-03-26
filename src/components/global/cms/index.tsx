@@ -25,6 +25,7 @@ import "plyr/dist/plyr.css";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Player from "../player";
 import Image from "next/image";
+import Spinner from "../spinner";
 dayjs.extend(relativeTime);
 
 const { Option } = Select;
@@ -60,11 +61,12 @@ const PromotionalVideosPage: React.FC = () => {
 	);
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState<boolean>(false);
+	const [fetching, setFetching] = useState<boolean>(false);
 	const [fileList, setFileList] = useState<any[]>([]);
 
 	const fetchVideos = useCallback(async () => {
 		try {
-			setLoading(true);
+			setFetching(true);
 			const { data } = await axiosInstance.get(
 				"/api/user/admin/promotional-videos"
 			);
@@ -74,7 +76,7 @@ const PromotionalVideosPage: React.FC = () => {
 				error.response?.data?.error || "Failed to fetch promotional videos"
 			);
 		} finally {
-			setLoading(false);
+			setFetching(false);
 		}
 	}, []);
 
@@ -223,7 +225,9 @@ const PromotionalVideosPage: React.FC = () => {
 		fetchVideos();
 	}, [fetchVideos]);
 
-	return (
+	return fetching ? (
+		<Spinner />
+	) : (
 		<div className="p-6 bg-gray-50 min-h-screen">
 			<div className="flex justify-between items-center mb-8">
 				<h1 className="text-3xl font-bold text-gray-800">Promotional Videos</h1>
