@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Refresh endpoint uses refreshToken cookie to set a new accessToken cookie
-        await axios.get("/api/user/auth/refresh-token", {
+        await axios.get("/api/user/admin/auth/refresh-token", {
           withCredentials: true, // Sends refreshToken cookie
         });
 

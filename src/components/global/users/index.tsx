@@ -66,7 +66,7 @@ const UsersListPage: React.FC = () => {
 			const {
 				users,
 				pagination: { total, totalPages, currentPage },
-			} = response.data.data;
+			} = response.data;
 			setUsers(users);
 			setPagination({
 				current: currentPage,

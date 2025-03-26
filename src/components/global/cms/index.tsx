@@ -68,7 +68,7 @@ const PromotionalVideosPage: React.FC = () => {
 			const { data } = await axiosInstance.get(
 				"/api/user/admin/promotional-videos"
 			);
-			setVideos(data.data);
+			setVideos(data.videos);
 		} catch (error: any) {
 			message.error(
 				error.response?.data?.error || "Failed to fetch promotional videos"
