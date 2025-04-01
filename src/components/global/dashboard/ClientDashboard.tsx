@@ -47,7 +47,11 @@ const separateByStatus = (
 };
 
 export const ClientDashboard = () => {
-	const { state, isConnected } = useDashboardSocket();
+	const { state, isConnected, fetchInitialData } = useDashboardSocket();
+
+	useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
 	useEffect(() => {
 		console.log("ClientDashboard state: ", state);

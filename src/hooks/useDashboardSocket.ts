@@ -31,15 +31,18 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 		titleSummaries: {},
 		thumbnails: {},
 		subscriptions: [],
-		activeSubscriptionsCount: 0
+		activeSubscriptionsCount: 0,
 	});
 
-	const { onEvent: onVideoEvent, isConnected: isVideoSocketConnected } =
-		useSocket(
-			`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
-			"/video/socket.io"
-		);
-	const { onEvent, isConnected } = useSocket(
+	const {
+		onEvent: onVideoEvent,
+		isConnected: isVideoSocketConnected,
+		emitEvent: videoEmit,
+	} = useSocket(
+		`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
+		"/video/socket.io"
+	);
+	const { onEvent, isConnected, emitEvent } = useSocket(
 		`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard` as string,
 		"/user/socket.io"
 	);
@@ -130,11 +133,11 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 				...prev,
 				subscriptions: [data, ...prev.subscriptions].slice(0, 5),
 			}));
-			if(data.status === 'active'){
+			if (data.status === "active") {
 				setState((prev) => ({
-          ...prev,
-          activeSubscriptionsCount: prev.activeSubscriptionsCount + 1
-        }));
+					...prev,
+					activeSubscriptionsCount: prev.activeSubscriptionsCount + 1,
+				}));
 			}
 		});
 
@@ -147,5 +150,10 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 		});
 	}, [onEvent, onVideoEvent]);
 
-	return { state, isConnected: isConnected && isVideoSocketConnected };
+	const fetchInitialData = () => {
+		videoEmit(EventName.ADMIN_DASHBOARD_INITIAL_DATA, null);
+		emitEvent(EventName.ADMIN_DASHBOARD_INITIAL_DATA, null);
+	};
+
+	return { state, isConnected: isConnected && isVideoSocketConnected, fetchInitialData };
 };

@@ -52,6 +52,7 @@ export interface SubscriptionUpdate {
 export interface AdminDashboardHook {
 	state: AdminDashboardState
 	isConnected: boolean;
+	fetchInitialData: () => void;
 }
 
 export interface AdminDashboardState {
