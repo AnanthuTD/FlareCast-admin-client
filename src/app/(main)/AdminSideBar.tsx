@@ -44,7 +44,7 @@ const items: MenuItem[] = [
 	getItem("Dashboard", "/dashboard", <HomeOutlined />),
 	getItem("User", "/users", <UserOutlined />),
 	getItem("CMS", "/cms", <VideoCameraOutlined />),
-	getItem("Payment Overview", "/payment-overview", <DollarOutlined />),
+	getItem("Payment Overview", "/payment", <DollarOutlined />),
 	getItem("Reports", "/reports", <FileTextOutlined />),
 	// getItem('Notifications ', '/notifications', <NotificationIcon />),
 	getItem(

@@ -51,8 +51,8 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 
 		onVideoEvent(
 			EventName.ADMIN_DASHBOARD_INITIAL_DATA,
-			(data: AdminDashboardState) => {
-				setState((prev) => ({ ...prev, ...data }));
+			(data: AdminDashboardState, statusCount) => {
+				setState((prev) => ({ ...prev, ...data, ...statusCount }));
 			}
 		);
 

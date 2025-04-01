@@ -5,9 +5,15 @@ import { useDashboardSocket } from "@/hooks/useDashboardSocket";
 import { DashboardStats } from "./DashboardStats";
 import { VideoStatusTable } from "./VideoStatusTable";
 import { SubscriptionTable } from "./SubscriptionTable";
-import { Row, Col } from "antd";
+import { Row, Col, Divider } from "antd";
 import { VideoStatus } from "@/types/types";
 import { AdminDashboardSkeleton } from "@/app/(main)/dashboard/loading";
+import StatusDashboardPie, {
+	StatusCountDisplayPie,
+} from "./StatusCountDisplayPie";
+import StatusDashboardBar, {
+	StatusCountDisplayBar,
+} from "./StatusCountDisplayBar";
 
 interface StatusBreakdown {
 	processing: VideoStatus[];
@@ -60,8 +66,16 @@ export const ClientDashboard = () => {
 		<>
 			<DashboardStats state={state} />
 
+			<Divider />
+
+			<StatusDashboardPie data={state} />
+
+			<Divider />
+
+			<StatusDashboardBar data={state} />
+
 			{/* Video Processing Sections */}
-			<Row gutter={[16, 16]} className="mt-6">
+			{/* <Row gutter={[16, 16]} className="mt-6">
 				<Col xs={24} md={8}>
 					<VideoStatusTable
 						title="Transcoding - Processing"
@@ -164,7 +178,7 @@ export const ClientDashboard = () => {
 						data={thumbnails.failed}
 					/>
 				</Col>
-			</Row>
+			</Row> */}
 
 			<Row gutter={[16, 16]} className="mt-6">
 				<Col xs={24} md={12}>

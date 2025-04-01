@@ -38,6 +38,11 @@ export const DashboardStats = ({ state }: DashboardStatsProps) => {
       </Col>
       <Col xs={24} sm={12} md={6}>
         <Card>
+          <Statistic title="Total Videos" value={state.totalVideos?.[0]?.total} />
+        </Card>
+      </Col>
+      <Col xs={24} sm={12} md={6}>
+        <Card>
           <Statistic title="Videos Transcoding" value={transcodingCount} />
         </Card>
       </Col>
