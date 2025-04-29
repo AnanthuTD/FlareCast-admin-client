@@ -5,7 +5,7 @@ import { SubscriptionPlan } from "@/types/types"; // Adjust path to your Subscri
 export const fetchSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {
   try {
     const { data } = await axiosInstance.get<SubscriptionPlan[]>(
-      "/api/admin/subscription-plans",
+      "/api/subscriptions/admin/plans",
       { withCredentials: true }
     );
     return data;
@@ -20,7 +20,7 @@ export const addSubscriptionPlan = async (
 ): Promise<SubscriptionPlan> => {
   try {
     const { data } = await axiosInstance.post<SubscriptionPlan>(
-      "/api/admin/subscription-plans",
+      "/api/subscriptions/admin/plans",
       values,
       { withCredentials: true }
     );
@@ -37,7 +37,7 @@ export const toggleSubscriptionPlanActive = async (
 ): Promise<SubscriptionPlan> => {
   try {
     const { data } = await axiosInstance.patch<SubscriptionPlan>(
-      `/api/admin/subscription-plans/${planId}/toggle`,
+      `/api/subscriptions/admin/plans/${planId}/toggle`,
       { isActive: !isActive },
       { withCredentials: true }
     );
