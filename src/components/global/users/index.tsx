@@ -51,7 +51,7 @@ const UsersListPage: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = await axiosInstance.get<PaginatedUsersResponse>(
-				"/api/user/admin/users",
+				"/api/admin/users",
 				{
 					params: {
 						page,
@@ -85,7 +85,7 @@ const UsersListPage: React.FC = () => {
 		setLoading(true);
 		try {
 			await axiosInstance.put(
-				`/api/user/admin/users/${userId}/ban`,
+				`/api/admin/users/${userId}/ban`,
 				{ isBanned: !isBanned },
 				{ withCredentials: true }
 			);

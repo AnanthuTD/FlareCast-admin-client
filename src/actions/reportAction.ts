@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 
-const API_BASE_PATH = "/api/user/admin";
+const API_BASE_PATH = "/api/admin";
 
 // Fetch sales summary
 export const fetchSalesSummary = async () => {

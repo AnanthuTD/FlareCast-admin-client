@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 	useEffect(() => {
 		const checkAuth = async () => {
 			if (!isAuthenticated && !user) {
-				// Attempt to fetch profile if no user is in state
 				const result = await dispatch(fetchAdminProfileThunk() as any);
         console.log(result);
 				if (result.success) {

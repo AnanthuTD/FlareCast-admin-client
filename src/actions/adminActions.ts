@@ -6,13 +6,12 @@ import {
 	logout,
 	setLoading,
 	clearError,
-} from "@/redux/slices/user"; // Import from userSlice
+} from "@/redux/slices/user";
 import { User } from "@/types/types";
 import { Dispatch } from "@reduxjs/toolkit";
 
-// Define response and error types
 interface AdminSignInResponse {
-	admin: User; // Matches User type from userSlice
+	admin: User; 
 }
 
 interface GoogleSignInResponse {
@@ -24,18 +23,13 @@ interface RefreshTokenResponse {
 	accessToken: string;
 }
 
-interface ErrorResponse {
-	message: string;
-}
-
-// Async actions with Axios
 export const adminSignIn =
 	(credentials: { email: string; password: string }) =>
 	async (dispatch: Dispatch) => {
 		dispatch(loginRequest());
 		try {
 			const response = await axiosInstance.post<AdminSignInResponse>(
-				"/api/user/admin/auth/sign-in",
+				"/api/admin/auth/sign-in",
 				credentials
 			);
 			dispatch(login({ user: response.data.admin }));
@@ -52,7 +46,7 @@ export const adminGoogleSignIn =
 		dispatch(loginRequest());
 		try {
 			const response = await axiosInstance.post<GoogleSignInResponse>(
-				"/api/user/admin/auth/google-sign-in",
+				"/api/admin/auth/google-sign-in",
 				{ code }
 			);
 			dispatch(login({ user: response.data }));
@@ -68,7 +62,7 @@ export const adminRefreshToken = () => async (dispatch: Dispatch) => {
 	dispatch(setLoading(true));
 	try {
 		const response = await axiosInstance.get<RefreshTokenResponse>(
-			"/api/user/admin/auth/refresh-token"
+			"/api/admin/auth/refresh-token"
 		);
 		dispatch(clearError()); // Clear any previous errors
 		return { success: true, accessToken: response.data.accessToken };
@@ -84,7 +78,7 @@ export const adminRefreshToken = () => async (dispatch: Dispatch) => {
 export const adminLogout = () => async (dispatch: Dispatch) => {
 	dispatch(setLoading(true));
 	try {
-		await axiosInstance.post("/api/user/admin/auth/logout");
+		await axiosInstance.post("/api/admin/auth/logout");
 		dispatch(logout());
 		return { success: true };
 	} catch (error: any) {
@@ -101,7 +95,7 @@ export const fetchAdminProfileThunk = () => async (dispatch: Dispatch) => {
 	dispatch(setLoading(true));
 	try {
 		const response = await axiosInstance.get<{ admin: User }>(
-			"/api/user/admin/profile"
+			"/api/admin/profile"
 		);
 		dispatch(login({ user: response.data.admin }));
 		return { success: true, admin: response.data.admin };

@@ -2,7 +2,7 @@ import axiosInstance from "@/lib/axios";
 
 export const fetchPayments = async ({ page, limit, status }) => {
 	try {
-		const { data } = await axiosInstance.get("/api/user/admin/payments", {
+		const { data } = await axiosInstance.get("/api/admin/payments", {
 			params: { page, limit, status },
 		});
 		return { success: true, data: data };
@@ -16,7 +16,7 @@ export const fetchPayments = async ({ page, limit, status }) => {
 
 export const fetchPaymentStatus = async () => {
 	try {
-		const { data } = await axiosInstance.get("/api/user/admin/payment-status");
+		const { data } = await axiosInstance.get("/api/admin/payment-status");
 		return { success: true, data: data };
 	} catch (error) {
 		return {

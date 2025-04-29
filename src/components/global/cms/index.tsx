@@ -68,7 +68,7 @@ const PromotionalVideosPage: React.FC = () => {
 		try {
 			setFetching(true);
 			const { data } = await axiosInstance.get(
-				"/api/user/admin/promotional-videos"
+				"/api/admin/promotional-videos"
 			);
 			setVideos(data.videos);
 		} catch (error: any) {
@@ -92,7 +92,7 @@ const PromotionalVideosPage: React.FC = () => {
 				}
 
 				const { data } = await axiosInstance.post(
-					"/api/user/admin/promotional-videos/signed-url",
+					"/api/admin/promotional-videos/signed-url",
 					{
 						title: values.title,
 						description: values.description,
@@ -125,7 +125,7 @@ const PromotionalVideosPage: React.FC = () => {
 
 			if (editingVideo) {
 				const { data } = await axiosInstance.put(
-					`/api/user/admin/promotional-videos/${editingVideo.id}`,
+					`/api/admin/promotional-videos/${editingVideo.id}`,
 					payload
 				);
 				setVideos((prevVideos) =>
@@ -134,7 +134,7 @@ const PromotionalVideosPage: React.FC = () => {
 				message.success("Promotional video updated successfully!");
 			} else {
 				const { data } = await axiosInstance.post(
-					"/api/user/admin/promotional-videos",
+					"/api/admin/promotional-videos",
 					payload
 				);
 				setVideos((prevVideos) => [...prevVideos, data.data]);
@@ -160,7 +160,7 @@ const PromotionalVideosPage: React.FC = () => {
 		try {
 			setLoading(true);
 			const { data } = await axiosInstance.put(
-				`/api/user/admin/promotional-videos/${id}`,
+				`/api/admin/promotional-videos/${id}`,
 				{ hidden: !hidden }
 			);
 			setVideos((prevVideos) =>
@@ -179,7 +179,7 @@ const PromotionalVideosPage: React.FC = () => {
 	const handleDeleteVideo = async (id: string) => {
 		try {
 			setLoading(true);
-			await axiosInstance.delete(`/api/user/admin/promotional-videos/${id}`);
+			await axiosInstance.delete(`/api/admin/promotional-videos/${id}`);
 			setVideos((prevVideos) => prevVideos.filter((v) => v.id !== id));
 			message.success("Promotional video deleted successfully!");
 		} catch (error: any) {

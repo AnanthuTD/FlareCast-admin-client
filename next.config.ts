@@ -4,26 +4,12 @@ const nextConfig: NextConfig = {
 	rewrites: async () => {
 		return [
 			{
-				source: "/api/user/:path*",
-				destination: process.env.NEXT_PUBLIC_USER_SERVICE_URL + "/api/:path*", // Proxy to user-service
-			},
-			{
-				source: "/api/collaboration/:path*",
-				destination:
-					process.env.NEXT_PUBLIC_COLLABORATION_SERVICE_URL + "/:path*", // Proxy to collaboration-service
-			},
-			{
-				source: "/api/video/:path*",
-				destination: process.env.NEXT_PUBLIC_VIDEO_SERVICE_URL + "/api/:path*", // Proxy to video-service
-			},
-			{
-				source: "/api/notification/:path*",
-				destination:
-					process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL + "/api/:path*", // Proxy to video-service
+				source: "/api/:path*",
+				destination: process.env.NEXT_PUBLIC_API_GATEWAY_URL + "/api/:path*",
 			},
 			{
 				source: "/gcs/:path*",
-				destination: process.env.NEXT_PUBLIC_GCS_URL + "/:path*", // Proxy to Google Cloud Storage
+				destination: process.env.NEXT_PUBLIC_GCS_URL + "/:path*",
 			},
 		];
 	},
