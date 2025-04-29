@@ -75,7 +75,7 @@ const SignIn: React.FC = () => {
 				<div
 					style={{
 						flex: 1,
-						backgroundImage: 'url("/admin/banner.png")',
+						backgroundImage: 'url("/banner.png")',
 						backgroundSize: "cover",
 						backgroundPosition: "center",
 						display: "flex",
