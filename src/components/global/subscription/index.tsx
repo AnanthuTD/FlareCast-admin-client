@@ -13,6 +13,7 @@ import {
 	Tag,
 	Row,
 	Col,
+	Pagination, 
 } from "antd";
 import {
 	addSubscriptionPlan,
@@ -25,11 +26,11 @@ const { Option } = Select;
 interface SubscriptionPlan {
 	id: string;
 	type: "free" | "paid";
-	planId?: string; // Optional for free plans
+	planId?: string;
 	name: string;
 	price: number;
-	interval?: number; // Optional for free plans
-	period?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly"; // Optional for free plans
+	interval?: number; 
+	period?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly"; 
 	maxRecordingDuration: number;
 	hasAiFeatures: boolean;
 	allowsCustomBranding: boolean;
@@ -48,18 +49,32 @@ const SubscriptionPlans: React.FC = () => {
 	const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState<boolean>(false);
+	// Pagination and filter states
+	const [currentPage, setCurrentPage] = useState<number>(1);
+	const [pageSize, setPageSize] = useState<number>(9); 
+	const [totalPlans, setTotalPlans] = useState<number>(0);
+	const [statusFilter, setStatusFilter] = useState<string>("all");
 
 	const fetchPlans = useCallback(async () => {
 		try {
 			setLoading(true);
-			const data = await fetchSubscriptionPlans();
-			setPlans(data);
+			const skip = (currentPage - 1) * pageSize;
+			const params: { skip: number; limit: number; status?: string } = {
+				skip,
+				limit: pageSize,
+			};
+
+			params.status = statusFilter;
+
+			const data = await fetchSubscriptionPlans(params);
+			setPlans(data.plans || []);
+			setTotalPlans(data.total || 0);
 		} catch (error: any) {
 			message.error(error.message || "Failed to fetch subscription plans");
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [currentPage, pageSize, statusFilter]);
 
 	const handleAddOrUpdatePlan = async (
 		values: Omit<SubscriptionPlan, "id" | "planId" | "createdAt" | "updatedAt">
@@ -67,9 +82,9 @@ const SubscriptionPlans: React.FC = () => {
 		try {
 			setLoading(true);
 			if (values.type === "free") {
-				values.price = 0; // Force price to 0 for free plans
-				delete values.interval; // Remove interval for free plans
-				delete values.period; // Remove period for free plans
+				values.price = 0;
+				delete values.interval; 
+				delete values.period;
 			}
 			const newPlan = await addSubscriptionPlan(values);
 			if (editingPlan) {
@@ -78,7 +93,7 @@ const SubscriptionPlans: React.FC = () => {
 				);
 				message.success("Subscription plan updated successfully!");
 			} else {
-				setPlans((prevPlans) => [...prevPlans, newPlan]);
+				fetchPlans() 
 				message.success("Subscription plan added successfully!");
 			}
 			setIsModalVisible(false);
@@ -108,6 +123,19 @@ const SubscriptionPlans: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const handlePageChange = (page: number, newPageSize?: number) => {
+		setCurrentPage(page);
+		if (newPageSize && newPageSize !== pageSize) {
+			setPageSize(newPageSize);
+			setCurrentPage(1); 
+		}
+	};
+
+	const handleStatusFilterChange = (value: string) => {
+		setStatusFilter(value);
+		setCurrentPage(1);
 	};
 
 	useEffect(() => {
@@ -140,7 +168,17 @@ const SubscriptionPlans: React.FC = () => {
 		<div className="p-6 bg-gray-50 min-h-screen">
 			<div className="flex justify-between items-center mb-8">
 				<h1 className="text-3xl font-bold text-gray-800">Subscription Plans</h1>
-				<div className="space-x-4">
+				<div className="space-x-4 flex items-center">
+					<Select
+						value={statusFilter}
+						onChange={handleStatusFilterChange}
+						className="w-32 rounded-full"
+						placeholder="Filter by status"
+					>
+						<Option value="all">All</Option>
+						<Option value="active">Active</Option>
+						<Option value="inactive">Inactive</Option>
+					</Select>
 					<Button
 						type="primary"
 						onClick={() => showModal()}
@@ -190,12 +228,12 @@ const SubscriptionPlans: React.FC = () => {
 									{plan.isActive ? "Deactivate" : "Activate"}
 								</Button>
 								{/* <Button
-									type="link"
-									onClick={() => showModal(plan)}
-									className="text-blue-600 hover:text-blue-800"
-								>
-									Edit
-								</Button> */}
+                  type="link"
+                  onClick={() => showModal(plan)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Edit
+                </Button> */}
 							</div>
 						}
 					>
@@ -243,6 +281,19 @@ const SubscriptionPlans: React.FC = () => {
 						</div>
 					</Card>
 				))}
+			</div>
+
+			{/* Pagination Component */}
+			<div className="mt-8 flex justify-center">
+				<Pagination
+					current={currentPage}
+					pageSize={pageSize}
+					total={totalPlans}
+					onChange={handlePageChange}
+					showSizeChanger
+					pageSizeOptions={["9", "18", "27"]} // Options for plans per page
+					className="pagination"
+				/>
 			</div>
 
 			<Modal
@@ -406,19 +457,17 @@ const SubscriptionPlans: React.FC = () => {
 					</Row>
 					<Row gutter={16}>
 						{/* <Col span={12}>
-							<Form.Item
-								name="allowsCustomBranding"
-								label="Custom Branding"
-								rules={[
-									{ required: true, message: "Please select custom branding" },
-								]}
-							>
-								<Select className="rounded-full w-full">
-									<Option value={true}>Yes</Option>
-									<Option value={false}>No</Option>
-								</Select>
-							</Form.Item>
-						</Col> */}
+              <Form.Item
+                name="allowsCustomBranding"
+                label="Custom Branding"
+                rules={[{ required: true, message: "Please select custom branding" }]}
+              >
+                <Select className="rounded-full w-full">
+                  <Option value={true}>Yes</Option>
+                  <Option value={false}>No</Option>
+                </Select>
+              </Form.Item>
+            </Col> */}
 						<Col span={12}>
 							<Form.Item
 								name="hasAdvancedEditing"
