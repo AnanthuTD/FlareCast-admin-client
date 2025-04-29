@@ -23,8 +23,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ collapsed, toggle }) => {
   const router = useRouter();
 
   const handleLogout = () => {
-    dispatch(adminLogout);
-    axiosInstance.get('/api/admin/auth/logout');
+    dispatch(adminLogout());
     router.push('/signin');
   };
 
