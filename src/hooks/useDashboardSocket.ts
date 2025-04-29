@@ -40,11 +40,11 @@ export const useDashboardSocket = (): AdminDashboardHook => {
 		emitEvent: videoEmit,
 	} = useSocket(
 		`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/admin-dashboard` as string,
-		"/video/socket.io"
+		"/videos/socket.io"
 	);
 	const { onEvent, isConnected, emitEvent } = useSocket(
 		`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/admin-dashboard` as string,
-		"/user/socket.io"
+		"/users/socket.io"
 	);
 
 	useEffect(() => {
