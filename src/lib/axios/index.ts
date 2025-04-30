@@ -1,80 +1,82 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
 const config: AxiosRequestConfig = {
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "69420", // For ngrok bypass
-  },
-  withCredentials: true, // Critical: Ensures accessToken and refreshToken cookies are sent/received
+	timeout: 10000,
+	headers: {
+		"Content-Type": "application/json",
+		"ngrok-skip-browser-warning": "69420",
+	},
+	withCredentials: true,
 };
 
 const axiosInstance: AxiosInstance = axios.create(config);
 
-// State to manage concurrent refresh requests
 let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
+let refreshSubscribers: ((token: string) => void)[] = [];
 
-// Queue requests waiting for token refresh
+// Function to subscribe failed requests to wait for token refresh
+const onTokenRefreshed = (token: string) => {
+	refreshSubscribers.forEach((callback) => callback(token));
+	refreshSubscribers = [];
+};
+
 const addRefreshSubscriber = (callback: () => void) => {
-  refreshSubscribers.push(callback);
+	refreshSubscribers.push(callback);
 };
 
-// Notify queued requests after refresh (no token passed since it’s in cookies)
-const onTokenRefreshed = () => {
-  refreshSubscribers.forEach((callback) => callback());
-  refreshSubscribers = []; // Clear queue
-};
+const excludeFromAuth = [
+	"/signin",
+	"/signup",
+	"/verification/email/success",
+	"/verification/email/failure",
+	"/verification/email/notify",
+	"/verification/invitation",
+	"/",
+];
 
-// Response interceptor for token refresh
+// Response interceptor
 axiosInstance.interceptors.response.use(
-  (response) => response, // Success: Pass through
-  async (error: AxiosError) => {
-    const originalRequest = error.config;
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config;
 
-    // Check for 401 and ensure we don’t retry infinitely
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // Queue request if refresh is already happening
-        return new Promise((resolve) => {
-          addRefreshSubscriber(() => {
-            resolve(axiosInstance(originalRequest));
-          });
-        });
-      }
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			if (isRefreshing) {
+				// Wait for the new token if refresh is in progress
+				return new Promise((resolve) => {
+					addRefreshSubscriber(() => {
+						resolve(axiosInstance(originalRequest));
+					});
+				});
+			}
 
-      // Start refresh process
-      originalRequest._retry = true;
-      isRefreshing = true;
+			originalRequest._retry = true;
+			isRefreshing = true;
 
-      try {
-        // Refresh endpoint uses refreshToken cookie to set a new accessToken cookie
-        await axios.post("/api/admin/auth/refresh-token", {
-          withCredentials: true, // Sends refreshToken cookie
-        });
+			try {
+				const response = await axios.post("/api/admin/auth/refresh-token");
+				const newAccessToken = response.data.accessToken;
 
-        // Refresh complete: New accessToken cookie is set by server
-        onTokenRefreshed();
-        isRefreshing = false;
+				onTokenRefreshed(newAccessToken);
+				isRefreshing = false;
 
-        // Retry original request with new accessToken cookie
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        isRefreshing = false;
-        refreshSubscribers = []; // Clear queue on failure
+				return axiosInstance(originalRequest);
+			} catch (refreshError) {
+				isRefreshing = false;
 
-        // Redirect to signin if refresh fails (e.g., refreshToken expired)
-        if (!["/signin", "/signup"].includes(window.location.pathname)) {
-          window.location.href = "/signin";
-        }
+				if (
+					!excludeFromAuth.includes(window.location.pathname) &&
+					window.location.pathname !== "/"
+				) {
+					window.location.href = "/signin";
+				}
 
-        return Promise.reject(refreshError);
-      }
-    }
+				return Promise.reject(refreshError);
+			}
+		}
 
-    // Pass non-401 errors through (e.g., 403, 500)
-    return Promise.reject(error);
-  }
+		return Promise.reject(error);
+	}
 );
 
 export default axiosInstance;
