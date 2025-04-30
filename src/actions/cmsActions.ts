@@ -1,5 +1,6 @@
 import axiosInstance from "@/lib/axios";
 import { apiRequest } from "@/lib/axios/adapter";
+import axios from "axios";
 
 export async function addOrUpdateVideo(formData: FormData) {
 	try {
@@ -22,7 +23,7 @@ export async function addOrUpdateVideo(formData: FormData) {
 			videoId = data.videoId;
 			s3Key = `${videoId}/original.${videoFile.name.split(".").pop()}`;
 
-			await axiosInstance.put(data.signedUrl, videoFile, {
+			await axios.put(data.signedUrl, videoFile, {
 				headers: { "Content-Type": videoFile.type },
 			});
 		} else {
