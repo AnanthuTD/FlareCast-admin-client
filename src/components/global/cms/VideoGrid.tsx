@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Button, Pagination, message } from "antd";
+import { Button, Pagination, message, notification } from "antd";
 import VideoCard from "./VideoCard";
 import VideoModal from "./VideoModal";
 import PlayerModal from "./PlayerModal";
@@ -9,6 +9,7 @@ import { PromotionalVideo } from "./types";
 import Spinner from "@/components/global/spinner";
 import { useRouter, useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axios";
+import { getPreviewVideo } from "@/actions/cmsActions";
 
 interface VideoGridProps {
 	initialVideos: PromotionalVideo[];
@@ -74,6 +75,20 @@ export default function VideoGrid({
 		fetchVideos((currentPage - 1) * currentPageSize, currentPageSize);
 	};
 
+	async function handleEdit(video: PromotionalVideo | null) {
+		if (!video) return;
+
+		const res = await getPreviewVideo(video.videoId);
+		if (res.error)
+			notification.error({ message: "Failed to get video details" });
+		else
+			setEditingVideo({
+				...video,
+				title: res.data.video.title,
+				description: res.data.video.description,
+			});
+	}
+
 	return fetching ? (
 		<Spinner />
 	) : (
@@ -102,7 +117,7 @@ export default function VideoGrid({
 						video={video}
 						onThumbnailClick={setSelectedVideo}
 						setIsPlayerModalVisible={setIsPlayerModalVisible}
-						setEditingVideo={setEditingVideo}
+						setEditingVideo={handleEdit}
 						setIsModalVisible={setIsModalVisible}
 						setVideos={setVideos}
 						setTotal={setTotal}
@@ -137,6 +152,7 @@ export default function VideoGrid({
 				}}
 				setVideos={setVideos}
 				setTotal={setTotal}
+				key={editingVideo?.id}
 			/>
 		</>
 	);
