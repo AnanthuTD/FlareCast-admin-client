@@ -2,6 +2,7 @@ import { Button } from "antd";
 import Hls from "hls.js";
 import Plyr from "plyr";
 import { useCallback, useEffect, useRef, useState } from "react";
+import "plyr/dist/plyr.css";
 
 const Player: React.FC<{
 	hslUrl: string;
