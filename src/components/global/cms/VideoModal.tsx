@@ -157,7 +157,7 @@ export default function VideoModal({
 						>
 							<Select className="rounded-full w-full">
 								<Option value="PROMOTIONAL">Promotional</Option>
-								<Option value="NEW_FEATURE">New Feature</Option>
+								<Option value="GET_STARTED">Get Started</Option>
 							</Select>
 						</Form.Item>
 					</Col>
